@@ -150,4 +150,3 @@ if video:
                         )
 else:
     st.info("Upload a video to get started.")
-￼Enter
