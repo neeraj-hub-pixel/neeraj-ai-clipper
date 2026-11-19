@@ -570,7 +570,7 @@ else:
         3. It renders up to five vertical clips, subtitle files and a suggested SEO package for each.
         """
     )
-￼EnterIf the source is short, allow the best distinct windows even if overlap is unavoidable.
+
     if len(chosen) < min(clip_count, len(candidates)):
         for candidate in candidates:
             if candidate not in chosen:
