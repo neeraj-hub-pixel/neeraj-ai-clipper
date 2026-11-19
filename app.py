@@ -677,3 +677,10 @@ col1, col2 = st.columns(2)
 with col1:
     clip_count = st.number_input("Number of clips", min_value=5, max_value=5, value=5, step=1)
 with col2:
+    clip_duration = st.number_input(
+        "Clip duration (seconds)",
+        min_value=30,
+        max_value=60,
+        value=45,
+        step=5
+    )
