@@ -176,7 +176,7 @@ def choose_clips(segments, clip_count=5, min_seconds=30, max_seconds=60):
             chosen.append(candidate)
         if len(chosen) == clip_count:
             break
- import os
+import os
 import re
 import json
 import math
