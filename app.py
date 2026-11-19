@@ -43,15 +43,46 @@ def validate_youtube_url(url):
 
 def download_youtube_video(url, folder):
     if yt_dlp is None:
-        raise RuntimeError("yt-dlp is missing. Add 'yt-dlp' to requirements.txt and redeploy.")
+        raise RuntimeError("yt-dlp is missing. Add 'yt-dlp[default]' to requirements.txt and redeploy.")
+
     template = os.path.join(folder, "source.%(ext)s")
-    options = {"format": "best[ext=mp4]/best", "outtmpl": template, "noplaylist": True, "quiet": True, "no_warnings": True, "merge_output_format": "mp4", "socket_timeout": 30, "retries": 2}
-    with yt_dlp.YoutubeDL(options) as downloader:
-        info = downloader.extract_info(url, download=True)
-        title = info.get("title") or "YouTube video"
-    files = [os.path.join(folder, n) for n in os.listdir(folder) if n.startswith("source.") and os.path.isfile(os.path.join(folder, n))]
+
+    # Ask yt-dlp for the best single-file format first. This avoids forcing
+    # MP4 when a particular YouTube video does not offer an MP4 format.
+    options = {
+        "format": "best",
+        "outtmpl": template,
+        "noplaylist": True,
+        "quiet": True,
+        "no_warnings": True,
+        "socket_timeout": 30,
+        "retries": 3,
+        "fragment_retries": 3,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(options) as downloader:
+            info = downloader.extract_info(url, download=True)
+            title = info.get("title") or "YouTube video"
+    except Exception as exc:
+        raise RuntimeError(
+            "YouTube could not provide a downloadable format for this link. "
+            "The video may be private, restricted, unavailable, or YouTube may "
+            "have changed its playback requirements. Try another video or use "
+            "the Upload video file option. Details: " + str(exc)
+        ) from exc
+
+    files = [
+        os.path.join(folder, name)
+        for name in os.listdir(folder)
+        if name.startswith("source.") and os.path.isfile(os.path.join(folder, name))
+    ]
     if not files:
-        raise RuntimeError("The YouTube video could not be downloaded.")
+        raise RuntimeError(
+            "yt-dlp finished without creating a video file. Try uploading the "
+            "video directly instead."
+        )
+
     return files[0], title
 
 
@@ -250,4 +281,3 @@ else:
     2. The app transcribes the audio and finds promising moments.
     3. It creates vertical clips, subtitle files, and suggested YouTube SEO text.
     """)
-pu
